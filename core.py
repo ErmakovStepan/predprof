@@ -15,7 +15,6 @@
 
 """
 Запуск: python3 core.py --model_dir=/путь к папке model_dir --image_file=/путь к фотке --num_top_predictions=1   ИЛИ   поменять в программе дефолты
-
 TODO:
 	1. Поменять в программе дефолты (опционально)
 	2. Добавить камеру
@@ -23,22 +22,16 @@ TODO:
 	4. В new подключить моторы
 	5. Сделать возможность распознавания нескольких партий мусора за одну сессию (камера -> цикл)
 	6. Загрузить requirments.txt в Raspberry
-
 Simple image classification with Inception.
-
 Run image classification with Inception trained on ImageNet 2012 Challenge data
 set.
-
 This program creates a graph from a saved GraphDef protocol buffer,
 and runs inference on an input JPEG image. It outputs human readable
 strings of the top 5 predictions along with their probabilities.
-
 Change the --image_file argument to any jpg image to compute a
 classification of that image.
-
 Please see the tutorial and website for a detailed description of how
 to use this script to perform image recognition.
-
 https://tensorflow.org/tutorials/image_recognition/
 """
 
@@ -53,8 +46,8 @@ import sys
 import tarfile
 
 #tink
-from Tkinter import *
-import RPi.GPIO as GPIO
+from tkinter import *
+#import RPi.GPIO as GPIO
 import time
 
 import numpy as np
@@ -62,18 +55,21 @@ from six.moves import urllib
 import tensorflow as tf
 
 FLAGS = None
+bottles = ["bottle", "pop bottle, soda bottle", "water bottle", "bottled water"]
+accuracy = 0.7
+angle = 90
 
 # pylint: disable=line-too-long
 DATA_URL = 'http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz'
 # pylint: enable=line-too-long
 
-GPIO.setmode(GPIO.BCM)
+"""GPIO.setmode(GPIO.BCM)
 
 GPIO.setup(18, GPIO.OUT)
 
 pwm = GPIO.PWM(18, 100)
 
-pwm.start(5)
+pwm.start(5)"""
 
 class NodeLookup(object):
   """Converts integer node ID's to human readable labels."""
@@ -91,11 +87,9 @@ class NodeLookup(object):
 
   def load(self, label_lookup_path, uid_lookup_path):
     """Loads a human readable English name for each softmax node.
-
     Args:
       label_lookup_path: string UID to integer node ID.
       uid_lookup_path: string UID to human-readable string.
-
     Returns:
       dict from integer node ID to human-readable string.
     """
@@ -152,10 +146,8 @@ def create_graph():
 
 def run_inference_on_image(image):
   """Runs inference on an image.
-
   Args:
     image: Image file name.
-
   Returns:
     Nothing
   """
@@ -185,23 +177,15 @@ def run_inference_on_image(image):
 
     top_k = predictions.argsort()[-FLAGS.num_top_predictions:][::-1]
     for node_id in top_k:
-	  human_string = node_lookup.id_to_string(node_id)
+      human_string = node_lookup.id_to_string(node_id)
       score = predictions[node_id]
-	  ##new
-	  if (human_string == "bottle" or human_string == "pop bottle, soda bottle" or human_string == "water bottle" or human_string == "bottled water") and (score * 100 >= 70)
-		"""моторы в сторону упр модуля
-		   слип(0.5сек)
-		   вернуть моторы в изнач положение
-		"""
-	  else 
-		"""моторы в другую сторону
-		   слип(0.5сек)
-		   вернуть моторы в изнач положение
-		"""
-	  ##endnew
+	    ##new
+      if (human_string in bottles) and (score >= accuracy):
+        print("RIGHT")
+      else:
+        print("WRONG")
+      ##endnew
       print('%s (score = %.5f)' % (human_string, score))
-
-
 def maybe_download_and_extract():
   """Download and extract model tar file."""
   dest_directory = FLAGS.model_dir
@@ -220,14 +204,11 @@ def maybe_download_and_extract():
     print('Successfully downloaded', filename, statinfo.st_size, 'bytes.')
   tarfile.open(filepath, 'r:gz').extractall(dest_directory)
 
-
 def main(_):
   maybe_download_and_extract()
   image = (FLAGS.image_file if FLAGS.image_file else
            os.path.join(FLAGS.model_dir, 'cropped_panda.jpg'))
   run_inference_on_image(image)
-
-
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   # classify_image_graph_def.pb:
