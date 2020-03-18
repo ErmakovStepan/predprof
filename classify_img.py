@@ -20,7 +20,6 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
-import os
 import io
 import time
 import numpy as np
@@ -72,7 +71,7 @@ def main():
   interpreter.allocate_tensors()
   _, height, width, _ = interpreter.get_input_details()[0]['shape']
 
-"""  with picamera.PiCamera(resolution=(640, 480), framerate=30) as camera:
+  with picamera.PiCamera(resolution=(640, 480), framerate=30) as camera:
     camera.start_preview()
     try:
       stream = io.BytesIO()
@@ -90,12 +89,8 @@ def main():
         camera.annotate_text = '%s %.2f\n%.1fms' % (labels[label_id], prob,
                                                     elapsed_ms)
     finally:
-      camera.stop_preview()"""
-	  
-	os.system('fswebcam -r 640x480 -S 3 --no-banner --jpeg 50 --save /home/pi/photo.jpeg') # uses Fswebcam to take picture
-	image = "/home/pi/photo.jpeg"
-	results = classify_image(interpreter, image)
-	print(results)
+      camera.stop_preview()
+
 
 if __name__ == '__main__':
   main()
